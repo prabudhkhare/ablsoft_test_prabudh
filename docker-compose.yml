@@ -1,0 +1,40 @@
+services:
+
+  db:
+    image: postgres:16
+    container_name: pima-db
+    restart: always
+    environment:
+      POSTGRES_DB: pima
+      POSTGRES_USER: pima_user
+      POSTGRES_PASSWORD: pima_user_pass
+    volumes:
+      - db-data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  backend:
+    container_name: pima-backend
+    build: ./pima-backend
+    restart: always
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/pima
+      SPRING_DATASOURCE_USERNAME: pima_user
+      SPRING_DATASOURCE_PASSWORD: pima_user_pass
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+
+  frontend:
+    container_name: pima-frontend
+    build: ./pima-frontend
+    restart: always
+    ports:
+      - "4200:80"
+    depends_on:
+      - backend
+
+volumes:
+  db-data:
